@@ -1,258 +1,202 @@
-<!-- =========================
-BAXTI VELO - SIMPLE FRONTEND
-Includes: index.html + savat.html (in one file for simplicity)
-========================= -->
-
-<!-- =========================
-INDEX PAGE
-========================= -->
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baxti Velo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Live2D Qiz</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
-
-    body{
-      background:rgba(0,0,0,0.9);
-      color:white;
+    * {
+      box-sizing: border-box;
     }
 
-    /* NAVBAR */
-    .navbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:15px 20px;
-      background:#111;
-      position:sticky;
-      top:0;
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to bottom, #ffe4e1, #d8b4ff);
     }
 
-    .logo{
-      font-size:20px;
-      font-weight:bold;
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
 
-    .logo span.baqti{
-      color:gold;
-      font-size:18px;
+    #waifu-container {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(320px, 90vw);
+      height: min(550px, 80vh);
+      z-index: 999;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
     }
 
-    .logo span.velo{
-      color:white;
-      font-size:24px;
+    #waifu {
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+      position: relative;
     }
 
-    .nav-links{
-      display:flex;
-      gap:15px;
+    #speech-bubble {
+      position: absolute;
+      top: -140px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      color: #333;
+      padding: 15px 22px;
+      border-radius: 25px;
+      font-size: 17px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+      max-width: 320px;
+      text-align: center;
+      white-space: normal;
+      opacity: 0;
+      transition: all 0.4s ease;
+      pointer-events: none;
+      border: 4px solid #ff9ecd;
+      z-index: 1000;
     }
 
-    .nav-item{
-      cursor:pointer;
+    #speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 15px solid #fff;
     }
 
-    .dropdown{
-      position:absolute;
-      background:#222;
-      padding:10px;
-      display:none;
-      flex-direction:column;
-      max-height:300px;
-      overflow:auto;
-      z-index:10;
+    #speech-bubble.show {
+      opacity: 1;
+      top: -160px;
     }
 
-    .nav-item:hover .dropdown{
-      display:flex;
-    }
+    @media (max-width: 600px) {
+      #waifu-container {
+        width: min(240px, 92vw);
+        height: min(420px, 72vh);
+      }
 
-    /* SEARCH */
-    .search{
-      background:#222;
-      border:none;
-      padding:8px;
-      color:white;
-      border-radius:5px;
-    }
+      #speech-bubble {
+        max-width: 220px;
+        font-size: 14px;
+        padding: 12px 16px;
+        top: -120px;
+      }
 
-    /* PRODUCTS */
-    .container{
-      padding:20px;
+      #speech-bubble.show {
+        top: -140px;
+      }
     }
-
-    .section-title{
-      margin:15px 0;
-      font-size:18px;
-      border-left:3px solid gold;
-      padding-left:10px;
-    }
-
-    .products{
-      display:flex;
-      overflow-x:auto;
-      gap:15px;
-      padding-bottom:10px;
-    }
-
-    .card{
-      min-width:200px;
-      background:#1c1c1c;
-      padding:10px;
-      border-radius:10px;
-    }
-
-    .img{
-      width:100%;
-      height:120px;
-      background:#333;
-      border-radius:8px;
-    }
-
-    .price-old{
-      text-decoration:line-through;
-      color:gray;
-      font-size:12px;
-    }
-
-    .price-new{
-      color:gold;
-      font-weight:bold;
-    }
-
-    .btn{
-      margin-top:5px;
-      padding:5px;
-      width:100%;
-      background:gold;
-      border:none;
-      cursor:pointer;
-    }
-
   </style>
 </head>
 <body>
 
-<div class="navbar">
-  <div class="logo">
-    <span class="baqti">Baxti</span>
-    <span class="velo"> Velo</span>
+  <div id="waifu-container">
+    <div id="waifu"></div>
+    <div id="speech-bubble"></div>
   </div>
 
-  <input class="search" placeholder="Qidiruv..." onkeyup="searchProducts(this.value)"/>
+  <script src="https://cdn.jsdelivr.net/npm/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
 
-  <div class="nav-links">
+  <script>
+    L2Dwidget.init({
+      model: {
+        jsonPath: "https://cdn.jsdelivr.net/gh/evrstr/live2d-widget-models/live2d_evrstr/shizuku/model.json"
+      },
+      display: {
+        position: "right",
+        width: 300,
+        height: 550,
+        hOffset: 0,
+        vOffset: 0
+      },
+      mobile: {
+        show: true,
+        scale: 0.9
+      },
+      react: {
+        opacityDefault: 0.95,
+        opacityOnHover: 0.25
+      }
+    });
 
-    <div class="nav-item">
-      Velo-qismlar
-      <div class="dropdown" id="veloMenu">
-        <div onclick="scrollToId('rama')">Rama</div>
-        <div onclick="scrollToId('rul')">Rul</div>
-        <div onclick="scrollToId('disk')">Disk</div>
-        <div onclick="scrollToId('zanjir')">Zanjir</div>
-      </div>
-    </div>
+    const messages = [
+      "Salom! 😊 Menga tegsangiz xursand bo‘laman~",
+      "Boshimga bos! ✨",
+      "Qanday kuningiz o‘tyapti?",
+      "Yana bos, boshqa animatsiya chiqadi!",
+      "Sizga yoqyapmanmi? ❤️",
+      "Qo‘limga tegsangiz qizargan bo‘laman~",
+      "Rahmat, meni bosganingiz uchun!",
+      "Keling, suhbatlashamiz!"
+    ];
 
-    <div class="nav-item">
-      Skuter qismlari
-      <div class="dropdown">
-        <div onclick="scrollToId('motor')">Motor</div>
-        <div onclick="scrollToId('akum')">Akkumulyator</div>
-        <div onclick="scrollToId('ekran')">Ekran</div>
-      </div>
-    </div>
+    const bubble = document.getElementById('speech-bubble');
 
-    <div class="nav-item" onclick="goCart()">Biz bilan bog'lanish</div>
+    function showSpeech() {
+      const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+      bubble.textContent = randomMsg;
+      bubble.classList.add('show');
 
-  </div>
-</div>
+      setTimeout(() => {
+        bubble.classList.remove('show');
+      }, 4500);
+    }
 
-<div class="container">
+    function centerLive2D() {
+      const targets = [
+        '#waifu',
+        '#live2d-widget',
+        '#live2d-widget canvas',
+        '#live2d-widget iframe',
+        'canvas'
+      ];
 
-  <div class="section-title" id="rama">Rama</div>
-  <div class="products">
+      targets.forEach(selector => {
+        document.querySelectorAll(selector).forEach(el => {
+          el.style.position = 'fixed';
+          el.style.left = '50%';
+          el.style.bottom = '0px';
+          el.style.transform = 'translateX(-50%)';
+          el.style.zIndex = '999';
+        });
+      });
 
-    <div class="card">
-      <div class="img"></div>
-      <div>Rama Nikil</div>
-      <div class="price-old">360 000 so'm</div>
-      <div class="price-new">320 000 so'm</div>
-      <button class="btn" onclick="addCart('Rama Nikil')">Savatga</button>
-    </div>
+      const waifuContainer = document.getElementById('waifu-container');
+      if (waifuContainer) {
+        waifuContainer.style.left = '50%';
+        waifuContainer.style.bottom = '0px';
+        waifuContainer.style.transform = 'translateX(-50%)';
+      }
+    }
 
-  </div>
+    const waifuDiv = document.getElementById('waifu');
+    waifuDiv.addEventListener('click', showSpeech);
+    waifuDiv.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      showSpeech();
+    });
 
-  <div class="section-title" id="motor">Motor</div>
-  <div class="products">
-    <div class="card">
-      <div class="img"></div>
-      <div>Skuter Motor</div>
-      <div class="price-new">1 200 000 so'm</div>
-      <button class="btn" onclick="addCart('Motor')">Savatga</button>
-    </div>
-  </div>
-
-</div>
-
-<script>
-let cart = [];
-
-function addCart(item){
-  cart.push(item);
-  alert(item + " savatga qo'shildi");
-  localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-function goCart(){
-  window.location.href = "savat.html";
-}
-
-function scrollToId(id){
-  document.getElementById(id).scrollIntoView({behavior:"smooth"});
-}
-
-function searchProducts(value){
-  alert("Qidiruv: " + value);
-}
-</script>
-
-</body>
-</html>
-
-
-<!-- =========================
-SAVAT PAGE (savat.html)
-========================= -->
-
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Savat</title>
-<style>
-body{background:#111;color:white;font-family:Arial;padding:20px;}
-.item{background:#222;padding:10px;margin:10px 0;border-radius:8px;}
-</style>
-</head>
-<body>
-
-<h2>Savat</h2>
-<div id="list"></div>
-
-<script>
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let list = document.getElementById("list");
-
-cart.forEach(i=>{
-  let div = document.createElement("div");
-  div.className="item";
-  div.innerText=i;
-  list.appendChild(div);
-});
-</script>
-
+    window.addEventListener('resize', centerLive2D);
+    window.addEventListener('load', () => {
+      setTimeout(centerLive2D, 1200);
+      setTimeout(centerLive2D, 2500);
+      setTimeout(centerLive2D, 4000);
+    });
+  </script>
 </body>
 </html>
